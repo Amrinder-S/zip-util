@@ -28,17 +28,17 @@
             color: #ffffff;
             cursor: pointer;
         }
+
         .custom-alert {
-        padding: 10px;
-        background-color: #f2f2f2;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        margin-bottom: 10px;
-        font-weight: bold;
-        color: #333;
+            padding: 10px;
+            background-color: #f2f2f2;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
         }
 
-        
         .info-area {
             border: 2px dashed #ccc;
             padding: 20px;
@@ -58,61 +58,72 @@
     <div id="output" class='custom-alert'></div>
 
     <div class="info-area">
-        <p><strong>Privacy Policy:</strong> All the zipped files are zipped directly in browser.</p>
+        <p><strong>Privacy Policy:</strong> All the zipped files are zipped directly in the browser.</p>
         <p>Nothing is sent over to the website.</p>
     </div>
 
-
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script>
     <script>
-        function handleFileUpload() {
-        const fileInput = document.getElementById("file-input");
-        const outputDiv = document.getElementById("output");
-    
-        if (fileInput.files.length === 0) {
-            outputDiv.innerHTML = "Please select one or more files.";
-            return;
-        }
-    
-        const zip = new JSZip();
-    
-        for (let i = 0; i < fileInput.files.length; i++) {
-            const file = fileInput.files[i];
-            zip.file(file.name, file);
-        }
-    
-        zip.generateAsync({ type: "blob" })
-            .then(function(content) {
-                var zipFileName = "file.zip";
-                if(document.getElementById("nameInput").value === ""){
-                    zipFileName = "file.zip";
-                    outputDiv.innerHTML = "No name supplied, File name set to file.zip";
-                }
-                else {
-                    zipFileName = document.getElementById("nameInput").value + ".zip";
-                }
-                const zipBlob = new Blob([content]);
-                const zipURL = URL.createObjectURL(zipBlob);
-    
-                const link = document.createElement("a");
-                link.href = zipURL;
-                link.download = zipFileName;
-                link.style.display = "none";
-    
-                document.body.appendChild(link);
-                link.click();
-    
-                outputDiv.innerHTML = `Files zipped successfully as "${zipFileName}"`;
-            })
-            .catch(function(error) {
-                console.error(error);
-                outputDiv.innerHTML = "An error occurred while zipping files.";
-            });
-    };
-    
+        const dropArea = document.getElementById("drop-area");
+
+        // Prevent default behavior for drag and drop events
+        dropArea.addEventListener("dragover", function(e) {
+            e.preventDefault();
+            dropArea.style.border = "2px dashed #007bff";
+        });
+
+        dropArea.addEventListener("dragleave", function(e) {
+            e.preventDefault();
+            dropArea.style.border = "2px dashed #ccc";
+        });
+
+        dropArea.addEventListener("drop", function(e) {
+            e.preventDefault();
+            dropArea.style.border = "2px dashed #ccc";
+            
+            const files = e.dataTransfer.files;
+            handleFileUpload(files);
+        });
+
+        function handleFileUpload(files) {
+            const outputDiv = document.getElementById("output");
+
+            if (files.length === 0) {
+                outputDiv.innerHTML = "Please select one or more files.";
+                return;
+            }
+
+            const zip = new JSZip();
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                zip.file(file.name, file);
+            }
+
+            zip.generateAsync({ type: "blob" })
+                .then(function(content) {
+                    var zipFileName = "file.zip";
+                    if (document.getElementById("nameInput").value !== "") {
+                        zipFileName = document.getElementById("nameInput").value + ".zip";
+                    }
+                    const zipBlob = new Blob([content]);
+                    const zipURL = URL.createObjectURL(zipBlob);
+
+                    const link = document.createElement("a");
+                    link.href = zipURL;
+                    link.download = zipFileName;
+                    link.style.display = "none";
+
+                    document.body.appendChild(link);
+                    link.click();
+
+                    outputDiv.innerHTML = `Files zipped successfully as "${zipFileName}"`;
+                })
+                .catch(function(error) {
+                    console.error(error);
+                    outputDiv.innerHTML = "An error occurred while zipping files.";
+                });
+        };
     </script>
-
-
 </body>
 </html>
