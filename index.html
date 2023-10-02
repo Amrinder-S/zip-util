@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload and Zip</title>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 20px;
+}
+
+/* input[type="file"] {
+    display: none;
+} */
+
+button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#output {
+    margin-top: 20px;
+}
+
+    </style>
+</head>
+<body>
+    <input type="file" id="fileInput" multiple>
+    <button id="zipButton">Zip Files</button>
+    <div id="output"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script>
+
+<script>
+    document.getElementById("zipButton").addEventListener("click", function() {
+    const fileInput = document.getElementById("fileInput");
+    const outputDiv = document.getElementById("output");
+
+    if (fileInput.files.length === 0) {
+        outputDiv.innerHTML = "Please select one or more files.";
+        return;
+    }
+
+    const zip = new JSZip();
+
+    for (let i = 0; i < fileInput.files.length; i++) {
+        const file = fileInput.files[i];
+        zip.file(file.name, file);
+    }
+
+    zip.generateAsync({ type: "blob" })
+        .then(function(content) {
+            const zipFileName = "files.zip";
+            const zipBlob = new Blob([content]);
+            const zipURL = URL.createObjectURL(zipBlob);
+
+            const link = document.createElement("a");
+            link.href = zipURL;
+            link.download = zipFileName;
+            link.style.display = "none";
+
+            document.body.appendChild(link);
+            link.click();
+
+            outputDiv.innerHTML = `Files zipped successfully as "${zipFileName}"`;
+        })
+        .catch(function(error) {
+            console.error(error);
+            outputDiv.innerHTML = "An error occurred while zipping files.";
+        });
+});
+
+</script>
+
+</body>
+</html>
